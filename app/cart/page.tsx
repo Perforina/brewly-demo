@@ -76,15 +76,17 @@ export default function CartPage() {
                     Increase
                   </button>
                 </div>
-                <p className="w-20 text-right font-semibold tabular-nums">{formatPrice(product.price * line.quantity)}</p>
-                <button
-                  type="button"
-                  onClick={() => removeItem(line.productId)}
-                  aria-label={`Remove ${product.name}`}
-                  className="text-sm font-medium text-danger underline underline-offset-4"
-                >
-                  Remove
-                </button>
+                <div className="ml-auto flex items-baseline gap-3 whitespace-nowrap">
+                  <p className="font-semibold tabular-nums">{formatPrice(product.price * line.quantity)}</p>
+                  <button
+                    type="button"
+                    onClick={() => removeItem(line.productId)}
+                    aria-label={`Remove ${product.name}`}
+                    className="text-xs text-muted underline underline-offset-4 hover:text-ink"
+                  >
+                    Remove
+                  </button>
+                </div>
               </li>
             );
           })}
@@ -95,16 +97,16 @@ export default function CartPage() {
             <label htmlFor="coupon" className="mb-2 block text-sm font-medium text-muted">
               Coupon code
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2">
               <input
                 id="coupon"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 aria-invalid={!!couponError}
                 aria-describedby={couponError ? "coupon-error" : undefined}
-                className="glass-input min-w-0 flex-1"
+                className="glass-input"
               />
-              <button type="submit" className="glass pill pill-accent">
+              <button type="submit" className="glass pill pill-accent w-full">
                 Apply coupon
               </button>
             </div>
@@ -114,7 +116,7 @@ export default function CartPage() {
               </p>
             )}
             {coupon && (
-              <p className="mt-3 flex items-center justify-between gap-2 rounded-2xl bg-accent/15 px-4 py-2.5 text-sm">
+              <p className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-accent/15 px-3.5 py-2.5 text-[13px] whitespace-nowrap sm:text-sm">
                 <span className="font-medium">Coupon {coupon} applied</span>
                 <button type="button" onClick={removeCoupon} className="font-medium text-danger underline underline-offset-4">
                   Remove coupon

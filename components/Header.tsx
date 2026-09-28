@@ -8,7 +8,7 @@ export function Header() {
   const { itemCount, hydrated } = useCart();
 
   return (
-    <header className="glass sticky top-0 z-20">
+    <header className="header-bar sticky top-0 z-20">
       <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link href="/" className="rounded-full">
           <Wordmark />
