@@ -4,7 +4,10 @@ import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/products";
 
 export function OrderSummary() {
-  const { totals, coupon } = useCart();
+  const { totals, coupon, hydrated } = useCart();
+
+  // Never show totals computed from the empty pre-hydration cart.
+  if (!hydrated) return null;
 
   return (
     <dl className="space-y-2.5 text-sm">
@@ -13,7 +16,7 @@ export function OrderSummary() {
         <dd className="text-right tabular-nums">{formatPrice(totals.subtotal)}</dd>
       </div>
       <div className="flex justify-between gap-4">
-        <dt className="text-muted">Discount{coupon ? ` (${coupon})` : ""}</dt>
+        <dt className="text-muted">{coupon ? `Discount (${coupon})` : "Discount"}</dt>
         <dd className="text-right tabular-nums">
           {totals.discount > 0 ? `-${formatPrice(totals.discount)}` : formatPrice(0)}
         </dd>

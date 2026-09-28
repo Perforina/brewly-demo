@@ -13,7 +13,13 @@ export default function CartPage() {
   const [code, setCode] = useState("");
   const [couponError, setCouponError] = useState<string | null>(null);
 
-  if (!hydrated) return <p className="text-muted">Loading cart…</p>;
+  if (!hydrated) {
+    return (
+      <p role="status" aria-busy="true" className="text-muted">
+        Loading cart…
+      </p>
+    );
+  }
 
   if (lines.length === 0) {
     return (
@@ -53,7 +59,7 @@ export default function CartPage() {
                 </div>
                 <div className="min-w-32 flex-1">
                   <p className="font-display text-lg">{product.name}</p>
-                  <p className="text-sm text-muted tabular-nums">{formatPrice(product.price)} each</p>
+                  <p className="text-sm text-muted tabular-nums">{`${formatPrice(product.price)} each`}</p>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -65,7 +71,7 @@ export default function CartPage() {
                     Decrease
                   </button>
                   <span className="w-16 text-center text-sm font-medium tabular-nums" aria-live="polite">
-                    Qty: {line.quantity}
+                    {`Qty: ${line.quantity}`}
                   </span>
                   <button
                     type="button"
@@ -117,7 +123,7 @@ export default function CartPage() {
             )}
             {coupon && (
               <p className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-accent/15 px-3.5 py-2.5 text-[13px] whitespace-nowrap sm:text-sm">
-                <span className="font-medium">Coupon {coupon} applied</span>
+                <span className="font-medium">{`Coupon ${coupon} applied`}</span>
                 <button type="button" onClick={removeCoupon} className="font-medium text-danger underline underline-offset-4">
                   Remove coupon
                 </button>

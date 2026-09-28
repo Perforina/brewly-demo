@@ -10,11 +10,19 @@ export default function ConfirmationPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setOrder(loadLastOrder());
+    const saved = loadLastOrder();
+    // Only treat it as an order once both values exist, so the summary never renders half-filled.
+    setOrder(saved && saved.orderNumber && Number.isFinite(saved.total) ? saved : null);
     setLoaded(true);
   }, []);
 
-  if (!loaded) return <p className="text-muted">Loading…</p>;
+  if (!loaded) {
+    return (
+      <p role="status" aria-busy="true" className="text-muted">
+        Loading…
+      </p>
+    );
+  }
 
   if (!order) {
     return (
@@ -35,12 +43,13 @@ export default function ConfirmationPage() {
         </svg>
       </div>
       <h1 className="mb-4 text-4xl">Order confirmed</h1>
-      <p className="mb-6 text-muted">Thanks, {order.name}! A receipt is on its way to {order.email}.</p>
-      <p className="mb-2 rounded-2xl bg-white/[0.05] px-4 py-3">
-        Order number: <strong>{order.orderNumber}</strong>
+      <p className="mb-6 text-muted">{`Thanks, ${order.name}! A receipt is on its way to ${order.email}.`}</p>
+      {/* Label and value in one text node so the line is never read without its value. */}
+      <p data-testid="order-number" className="mb-2 rounded-2xl bg-white/[0.05] px-4 py-3 font-semibold">
+        {`Order number: ${order.orderNumber}`}
       </p>
-      <p className="mb-8 rounded-2xl bg-white/[0.05] px-4 py-3 text-lg">
-        Total: <strong>{formatPrice(order.total)}</strong>
+      <p data-testid="order-total" className="mb-8 rounded-2xl bg-white/[0.05] px-4 py-3 text-lg font-semibold">
+        {`Total: ${formatPrice(order.total)}`}
       </p>
       <Link href="/" className="glass pill pill-accent">
         Continue shopping

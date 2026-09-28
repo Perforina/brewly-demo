@@ -29,7 +29,13 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [placing, setPlacing] = useState(false);
 
-  if (!hydrated) return <p className="text-muted">Loading…</p>;
+  if (!hydrated) {
+    return (
+      <p role="status" aria-busy="true" className="text-muted">
+        Loading…
+      </p>
+    );
+  }
 
   if (lines.length === 0 && !placing) {
     return (

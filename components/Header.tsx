@@ -18,7 +18,8 @@ export function Header() {
             Shop
           </Link>
           <Link href="/cart" className="glass chip">
-            Cart ({hydrated ? itemCount : 0})
+            {/* No count until the saved cart has loaded, so "Cart (0)" is never shown for a full cart. */}
+            {hydrated ? `Cart (${itemCount})` : "Cart"}
           </Link>
         </div>
       </nav>

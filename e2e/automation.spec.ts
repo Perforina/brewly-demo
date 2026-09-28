@@ -91,3 +91,87 @@ test("native scrollIntoView({block: 'start'}) never hides a button under the hea
     expect(await isTopmostAtCentre(button)).toBe(true);
   }
 });
+
+/**
+ * Records every text node the page ever renders (from before first paint), so a
+ * test can assert nothing was shown half-filled or from pre-hydration state.
+ */
+async function recordRenderedText(page: Page) {
+  await page.addInitScript(() => {
+    const seen: string[] = [];
+    (window as unknown as { __seenText: string[] }).__seenText = seen;
+    const record = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        // Record the node and its element: React can split one visible phrase across text nodes.
+        for (const text of [node.nodeValue, node.parentElement?.textContent]) {
+          if (text?.trim()) seen.push(text.trim());
+        }
+      } else node.childNodes.forEach(record);
+    };
+    new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "characterData") record(m.target);
+        m.addedNodes.forEach(record);
+      }
+    }).observe(document, { childList: true, subtree: true, characterData: true });
+  });
+  return () => page.evaluate(() => (window as unknown as { __seenText: string[] }).__seenText);
+}
+
+const seed = (page: Page, key: string, value: unknown) =>
+  page.addInitScript(([k, v]) => localStorage.setItem(k, v), [key, JSON.stringify(value)] as const);
+
+test("confirmation renders order number and total atomically, never a bare label", async ({ page }) => {
+  await seed(page, "brewly-last-order", { orderNumber: "BRW-482913", total: 1700, name: "Ada", email: "ada@example.com" });
+  const seen = await recordRenderedText(page);
+  await page.goto("/confirmation");
+
+  const total = page.getByTestId("order-total");
+  const number = page.getByTestId("order-number");
+  await expect(total).toHaveText("Total: $17.00");
+  await expect(number).toHaveText("Order number: BRW-482913");
+  // One text node holding label and value together.
+  for (const el of [total, number]) {
+    expect(await el.evaluate((p) => p.childNodes.length === 1 && p.firstChild!.nodeType === Node.TEXT_NODE)).toBe(true);
+  }
+  const labels = [...new Set((await seen()).filter((t) => /^(Total|Order number):/.test(t)))];
+  expect(labels).toEqual(["Order number: BRW-482913", "Total: $17.00"]);
+});
+
+test("confirmation shows only a neutral loading state before the order loads", async ({ page }) => {
+  const seen = await recordRenderedText(page);
+  await page.goto("/confirmation");
+  await expect(page.getByRole("heading", { name: "No recent order" })).toBeVisible();
+  expect((await seen()).filter((t) => /Total|Order confirmed|Order number/.test(t))).toEqual([]);
+});
+
+test("cart never renders totals or count from the empty pre-hydration cart", async ({ page }) => {
+  // Kenya AA x2 = $40.00, SAVE10 -$4.00, shipping $5.00, total $41.00
+  await seed(page, "brewly-cart", { lines: [{ productId: "kenya-aa", quantity: 2 }], coupon: "SAVE10" });
+  const seen = await recordRenderedText(page);
+  await page.goto("/cart");
+
+  await expect(page.getByRole("link", { name: "Cart (2)" })).toBeVisible();
+  await expect(page.getByText("Qty: 2", { exact: true })).toBeVisible();
+  await expect(page.getByText("Coupon SAVE10 applied", { exact: true })).toBeVisible();
+  const text = await seen();
+  expect(text).not.toContain("Cart (0)");
+  expect(text).not.toContain("$0.00");
+  expect(text).not.toContain("Your cart is empty.");
+  expect(text.filter((t) => t.startsWith("$") || t.startsWith("-$"))).toEqual(
+    expect.arrayContaining(["$40.00", "-$4.00", "$5.00", "$41.00"]),
+  );
+});
+
+test("placing an order shows the same final total on confirmation", async ({ page }) => {
+  await seed(page, "brewly-cart", { lines: [{ productId: "kenya-aa", quantity: 2 }], coupon: "SAVE10" });
+  await page.goto("/checkout");
+  await page.getByLabel("Full name").fill("Ada Lovelace");
+  await page.getByLabel("Email").fill("ada@example.com");
+  await page.getByLabel("Shipping address").fill("1 Analytical Way");
+  await page.getByRole("button", { name: "Place order" }).click();
+
+  await expect(page.getByRole("heading", { name: "Order confirmed" })).toBeVisible();
+  await expect(page.getByTestId("order-total")).toHaveText("Total: $41.00");
+  await expect(page.getByTestId("order-number")).toHaveText(/^Order number: BRW-\d{6}$/);
+});

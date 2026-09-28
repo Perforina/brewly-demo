@@ -73,7 +73,7 @@ export default function HomePage() {
                 }}
                 className="glass pill pill-accent mt-auto w-full text-[15px]"
               >
-                Add {product.name} to cart
+                {`Add ${product.name} to cart`}
               </button>
               {lastAdded === product.id && (
                 <p role="status" className="mt-2 text-center text-sm text-muted">
