@@ -11,6 +11,7 @@
   --on-accent: #180a06; /* 5.7:1 on --accent; white would only reach 3.4:1 */
   --danger: #ffab9e;
   --radius-card: 24px;
+  --header-h: 64px;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -24,8 +25,17 @@
   --font-display: var(--font-inter-tight), -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
 }
 
+/* The document itself scrolls (no inner scroll container), and anything scrolled
+   into view lands below the sticky header instead of underneath it. */
 html {
   color-scheme: dark;
+  height: auto;
+  overflow-y: auto;
+  scroll-padding-top: var(--header-h);
+}
+body {
+  height: auto;
+  overflow: visible;
 }
 
 body {
@@ -172,11 +182,13 @@ h3,
     position: absolute;
     inset: 0;
     z-index: -1;
+    pointer-events: none;
     background: linear-gradient(to bottom, transparent 45%, var(--bg) 100%);
   }
   .steam {
     position: absolute;
     z-index: -2;
+    pointer-events: none;
     border-radius: 9999px;
     filter: blur(48px);
     animation: steam 20s ease-in-out infinite;

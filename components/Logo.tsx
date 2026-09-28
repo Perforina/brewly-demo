@@ -30,7 +30,7 @@ export function Laurel({ flip = false, className = "" }: { flip?: boolean; class
   return (
     <svg
       viewBox="0 0 48 96"
-      className={`h-20 w-10 opacity-60 sm:h-24 sm:w-12 ${className}`}
+      className={`pointer-events-none h-20 w-10 opacity-60 sm:h-24 sm:w-12 ${className}`}
       style={flip ? { transform: "scaleX(-1)" } : undefined}
       aria-hidden="true"
       focusable="false"

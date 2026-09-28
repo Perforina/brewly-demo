@@ -15,7 +15,7 @@ export function CoffeeBag({ productId, label, className = "" }: Props) {
 
   return (
     <div className={`@container relative aspect-[3/4] ${className}`}>
-      <svg viewBox="0 0 120 160" className="h-full w-full drop-shadow-md" aria-hidden="true" focusable="false">
+      <svg viewBox="0 0 120 160" className="pointer-events-none h-full w-full drop-shadow-md" aria-hidden="true" focusable="false">
         {/* Crimped top */}
         <path d="M22 8 L26 4 L30 8 L34 4 L38 8 L42 4 L46 8 L50 4 L54 8 L58 4 L62 8 L66 4 L70 8 L74 4 L78 8 L82 4 L86 8 L90 4 L94 8 L98 4 L98 26 L22 26 Z" fill={shade} />
         {/* Tin tie */}
@@ -41,7 +41,7 @@ export function CoffeeBag({ productId, label, className = "" }: Props) {
       {label && (
         <div
           data-label={label}
-          className="font-display absolute top-[54%] right-[26%] left-[26%] flex h-[20%] items-center justify-center text-center text-[clamp(0.45rem,9cqw,0.85rem)] leading-tight font-semibold text-[#3B2418] after:content-[attr(data-label)]"
+          className="font-display pointer-events-none absolute top-[54%] right-[26%] left-[26%] flex h-[20%] items-center justify-center text-center text-[clamp(0.45rem,9cqw,0.85rem)] leading-tight font-semibold text-[#3B2418] after:content-[attr(data-label)]"
           aria-hidden="true"
         />
       )}
