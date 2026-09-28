@@ -1,46 +1,218 @@
 @import "tailwindcss";
 
+:root {
+  --bg: #180a06;
+  --card: rgba(255, 255, 255, 0.06);
+  --text: #ede4d8;
+  --muted: rgba(235, 220, 205, 0.7);
+  --accent: #c8783a;
+  --accent-hover: #d98a4b;
+  --accent-text: #e39a5e; /* accent tint for text on glass; plain --accent is 4.4:1 */
+  --on-accent: #180a06; /* 5.7:1 on --accent; white would only reach 3.4:1 */
+  --danger: #ffab9e;
+  --radius-card: 24px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @theme inline {
-  --color-espresso: #3b2418;
-  --color-crema: #f6efe6;
-  --color-copper: #b5652b;
-  --color-copper-dark: #97521f;
-  --color-sage: #7a8b6f;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --color-bg: var(--bg);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-inter), -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-inter-tight), -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--color-crema);
-  color: var(--color-espresso);
+  color: var(--text);
+  background:
+    radial-gradient(ellipse 65% 55% at 15% 52%, rgba(168, 78, 10, 0.22), transparent),
+    radial-gradient(ellipse 52% 48% at 83% 26%, rgba(122, 52, 8, 0.17), transparent),
+    radial-gradient(ellipse 44% 52% at 56% 92%, rgba(98, 36, 5, 0.14), transparent),
+    #070402;
+  background-attachment: fixed;
 }
 
 h1,
 h2,
-h3 {
+h3,
+.font-display {
   font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-copper);
-  outline-offset: 2px;
-  border-radius: 6px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 @layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full bg-copper px-5 py-2.5 font-semibold text-white shadow-sm transition hover:bg-copper-dark active:translate-y-px disabled:opacity-60;
+  /* Glass system */
+  .glass {
+    border: none;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+      0 10px 30px rgba(0, 0, 0, 0.3);
+    -webkit-backdrop-filter: blur(12px) saturate(1.3);
+    backdrop-filter: blur(12px) saturate(1.3);
+    transition:
+      transform 0.15s var(--ease-out),
+      background-color 0.15s ease;
   }
-  .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full border border-espresso/20 bg-white px-3 py-1.5 text-sm font-medium transition hover:border-copper hover:text-copper;
+  /* Press feedback only on interactive glass, so cards don't shrink when a button inside is pressed. */
+  .glass:is(button, a):active:not(:disabled) {
+    transform: scale(0.97);
   }
-  .card {
-    @apply rounded-2xl border border-espresso/5 bg-white shadow-[0_2px_12px_rgba(59,36,24,0.06)];
+  .glass-card {
+    background: var(--card);
+    border-radius: var(--radius-card);
   }
-  .field {
-    @apply w-full rounded-xl border border-espresso/20 bg-white px-3 py-2.5 transition focus:border-copper focus:ring-2 focus:ring-copper/30 focus:outline-none;
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    padding: 0 1.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
   }
-  .link {
-    @apply font-medium text-copper underline decoration-copper/40 underline-offset-4 hover:decoration-copper;
+  .pill-accent {
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      0 8px 24px rgba(200, 120, 58, 0.28);
+  }
+  .pill-accent:hover {
+    background: var(--accent-hover);
+  }
+  .pill-accent:disabled {
+    opacity: 0.6;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .chip:hover {
+    background: rgba(255, 255, 255, 0.09);
+  }
+  .glass-input {
+    width: 100%;
+    min-height: 54px;
+    padding: 0.75rem 1.125rem;
+    border-radius: 16px;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.35),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transition: box-shadow 0.15s ease;
+  }
+  .glass-input:focus {
+    outline: none;
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.35),
+      inset 0 0 0 1px var(--accent),
+      0 0 0 3px rgba(200, 120, 58, 0.45);
+  }
+  .glass-input[aria-invalid="true"] {
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.35),
+      inset 0 0 0 1px var(--danger);
+  }
+  .text-link {
+    color: var(--accent-text);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: rgba(200, 120, 58, 0.45);
+    text-underline-offset: 4px;
+  }
+  .text-link:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  /* Hero steam */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: 430px;
+    border-radius: var(--radius-card);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(to bottom, transparent 45%, var(--bg) 100%);
+  }
+  .steam {
+    position: absolute;
+    z-index: -2;
+    border-radius: 9999px;
+    filter: blur(48px);
+    animation: steam 20s ease-in-out infinite;
+    will-change: transform;
+  }
+}
+
+@keyframes steam {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(6%, -10%, 0) scale(1.12);
+  }
+  66% {
+    transform: translate3d(-5%, -4%, 0) scale(0.94);
+  }
+}
+
+/* One-time entrance: only runs until IntroFlag marks <html> after first load. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+html:not([data-intro-done]) .rise {
+  animation: rise 0.4s var(--ease-out) both;
+  /* Capped at 2 steps so everything finishes within 0.4s + 80ms. */
+  animation-delay: calc(min(var(--i, 0), 2) * 40ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .glass:is(button, a):active:not(:disabled) {
+    transform: none;
   }
 }

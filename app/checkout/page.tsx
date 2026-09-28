@@ -20,7 +20,7 @@ function validate(fields: Fields): Errors {
   return errors;
 }
 
-const inputClass = "field";
+const inputClass = "glass-input";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -29,14 +29,14 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [placing, setPlacing] = useState(false);
 
-  if (!hydrated) return <p>Loading…</p>;
+  if (!hydrated) return <p className="text-muted">Loading…</p>;
 
   if (lines.length === 0 && !placing) {
     return (
-      <div className="card mx-auto max-w-lg p-8 text-center">
-        <h1 className="mb-4 text-3xl font-semibold">Checkout</h1>
-        <p className="mb-6 text-espresso/80">Your cart is empty.</p>
-        <Link href="/" className="btn-primary">
+      <div className="glass glass-card rise mx-auto max-w-lg p-8 text-center">
+        <h1 className="mb-4 text-3xl">Checkout</h1>
+        <p className="mb-6 text-muted">Your cart is empty.</p>
+        <Link href="/" className="glass pill pill-accent">
           Continue shopping
         </Link>
       </div>
@@ -65,10 +65,10 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div>
-      <h1 className="mb-6 text-3xl font-semibold sm:text-4xl">Checkout</h1>
-      <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
-        <form onSubmit={handleSubmit} noValidate className="card space-y-5 p-5 sm:p-6">
+    <div className="rise">
+      <h1 className="mb-6 text-3xl sm:text-4xl">Checkout</h1>
+      <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
+        <form onSubmit={handleSubmit} noValidate className="glass glass-card space-y-5 p-5 sm:p-6">
           {(
             [
               { id: "name", label: "Full name", type: "text", autoComplete: "name" },
@@ -76,7 +76,7 @@ export default function CheckoutPage() {
             ] as const
           ).map(({ id, label, type, autoComplete }) => (
             <div key={id}>
-              <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
+              <label htmlFor={id} className="mb-2 block text-sm font-medium text-muted">
                 {label}
               </label>
               <input
@@ -92,14 +92,14 @@ export default function CheckoutPage() {
                 className={inputClass}
               />
               {errors[id] && (
-                <p id={`${id}-error`} className="mt-1.5 text-sm font-medium text-red-700">
+                <p id={`${id}-error`} className="mt-1.5 text-sm font-medium text-danger">
                   {errors[id]}
                 </p>
               )}
             </div>
           ))}
           <div>
-            <label htmlFor="address" className="mb-1.5 block text-sm font-medium">
+            <label htmlFor="address" className="mb-2 block text-sm font-medium text-muted">
               Shipping address
             </label>
             <textarea
@@ -115,7 +115,7 @@ export default function CheckoutPage() {
               className={inputClass}
             />
             {errors.address && (
-              <p id="address-error" className="mt-1.5 text-sm font-medium text-red-700">
+              <p id="address-error" className="mt-1.5 text-sm font-medium text-danger">
                 {errors.address}
               </p>
             )}
@@ -123,16 +123,16 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={placing}
-            className="btn-primary w-full py-3"
+            className="glass pill pill-accent w-full"
           >
             Place order
           </button>
         </form>
 
-        <aside className="card h-fit p-5 sm:p-6">
-          <h2 className="mb-4 text-xl font-semibold">Order summary</h2>
+        <aside className="glass glass-card h-fit p-5 sm:p-6">
+          <h2 className="mb-4 text-xl">Order summary</h2>
           <OrderSummary />
-          <Link href="/cart" className="link mt-5 inline-block text-sm">
+          <Link href="/cart" className="text-link mt-5 inline-block text-sm">
             Back to cart
           </Link>
         </aside>

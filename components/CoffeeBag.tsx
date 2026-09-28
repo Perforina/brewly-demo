@@ -21,7 +21,7 @@ export function CoffeeBag({ productId, label, className = "" }: Props) {
         {/* Tin tie */}
         <rect x="18" y="24" width="84" height="5" rx="2" fill="#C9B79F" />
         {/* Bag body */}
-        <path d="M22 29 L98 29 L106 148 Q106 156 98 156 L22 156 Q14 156 14 148 Z" fill={bag} />
+        <path d="M22 29 L98 29 L106 148 Q106 156 98 156 L22 156 Q14 156 14 148 Z" fill={bag} stroke="#fff" strokeOpacity="0.14" />
         {/* Side shading */}
         <path d="M22 29 L32 29 L28 156 L22 156 Q14 156 14 148 Z" fill={shade} opacity="0.45" />
         <path d="M88 29 L98 29 L106 148 Q106 156 98 156 L92 156 Z" fill="#fff" opacity="0.08" />
@@ -41,7 +41,7 @@ export function CoffeeBag({ productId, label, className = "" }: Props) {
       {label && (
         <div
           data-label={label}
-          className="font-display absolute top-[54%] right-[26%] left-[26%] flex h-[20%] items-center justify-center text-center text-[clamp(0.45rem,9cqw,0.85rem)] leading-tight font-semibold text-espresso after:content-[attr(data-label)]"
+          className="font-display absolute top-[54%] right-[26%] left-[26%] flex h-[20%] items-center justify-center text-center text-[clamp(0.45rem,9cqw,0.85rem)] leading-tight font-semibold text-[#3B2418] after:content-[attr(data-label)]"
           aria-hidden="true"
         />
       )}
