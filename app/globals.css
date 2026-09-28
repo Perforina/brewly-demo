@@ -1,6 +1,46 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-espresso: #3b2418;
+  --color-crema: #f6efe6;
+  --color-copper: #b5652b;
+  --color-copper-dark: #97521f;
+  --color-sage: #7a8b6f;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+}
+
 body {
-  background: #faf7f2;
-  color: #2b1d14;
+  background: var(--color-crema);
+  color: var(--color-espresso);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-copper);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-copper px-5 py-2.5 font-semibold text-white shadow-sm transition hover:bg-copper-dark active:translate-y-px disabled:opacity-60;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-espresso/20 bg-white px-3 py-1.5 text-sm font-medium transition hover:border-copper hover:text-copper;
+  }
+  .card {
+    @apply rounded-2xl border border-espresso/5 bg-white shadow-[0_2px_12px_rgba(59,36,24,0.06)];
+  }
+  .field {
+    @apply w-full rounded-xl border border-espresso/20 bg-white px-3 py-2.5 transition focus:border-copper focus:ring-2 focus:ring-copper/30 focus:outline-none;
+  }
+  .link {
+    @apply font-medium text-copper underline decoration-copper/40 underline-offset-4 hover:decoration-copper;
+  }
 }

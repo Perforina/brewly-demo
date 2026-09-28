@@ -18,9 +18,9 @@ export default function ConfirmationPage() {
 
   if (!order) {
     return (
-      <div>
-        <h1 className="mb-4 text-3xl font-bold">No recent order</h1>
-        <Link href="/" className="font-medium text-amber-900 underline">
+      <div className="card mx-auto max-w-lg p-8 text-center">
+        <h1 className="mb-6 text-3xl font-semibold">No recent order</h1>
+        <Link href="/" className="btn-primary">
           Continue shopping
         </Link>
       </div>
@@ -28,16 +28,21 @@ export default function ConfirmationPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg rounded-lg border border-amber-900/10 bg-white p-8 text-center">
-      <h1 className="mb-4 text-3xl font-bold text-green-800">Order confirmed</h1>
-      <p className="mb-2">Thanks, {order.name}! A receipt is on its way to {order.email}.</p>
-      <p className="mb-2">
+    <div className="card mx-auto max-w-lg p-8 text-center sm:p-10">
+      <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-sage/20" aria-hidden="true">
+        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="#3B2418" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12.5l4.5 4.5L19 7.5" />
+        </svg>
+      </div>
+      <h1 className="mb-4 text-4xl font-semibold">Order confirmed</h1>
+      <p className="mb-6 text-espresso/80">Thanks, {order.name}! A receipt is on its way to {order.email}.</p>
+      <p className="mb-2 rounded-xl bg-crema px-4 py-3">
         Order number: <strong>{order.orderNumber}</strong>
       </p>
-      <p className="mb-6">
+      <p className="mb-8 rounded-xl bg-crema px-4 py-3">
         Total: <strong>{formatPrice(order.total)}</strong>
       </p>
-      <Link href="/" className="inline-block rounded bg-amber-900 px-4 py-2 font-medium text-white hover:bg-amber-800">
+      <Link href="/" className="btn-primary">
         Continue shopping
       </Link>
     </div>

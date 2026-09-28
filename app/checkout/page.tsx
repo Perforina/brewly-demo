@@ -20,7 +20,7 @@ function validate(fields: Fields): Errors {
   return errors;
 }
 
-const inputClass = "w-full rounded border border-amber-900/30 px-3 py-2";
+const inputClass = "field";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -33,10 +33,10 @@ export default function CheckoutPage() {
 
   if (lines.length === 0 && !placing) {
     return (
-      <div>
-        <h1 className="mb-4 text-3xl font-bold">Checkout</h1>
-        <p className="mb-4">Your cart is empty.</p>
-        <Link href="/" className="font-medium text-amber-900 underline">
+      <div className="card mx-auto max-w-lg p-8 text-center">
+        <h1 className="mb-4 text-3xl font-semibold">Checkout</h1>
+        <p className="mb-6 text-espresso/80">Your cart is empty.</p>
+        <Link href="/" className="btn-primary">
           Continue shopping
         </Link>
       </div>
@@ -66,9 +66,9 @@ export default function CheckoutPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold">Checkout</h1>
+      <h1 className="mb-6 text-3xl font-semibold sm:text-4xl">Checkout</h1>
       <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
-        <form onSubmit={handleSubmit} noValidate className="space-y-4 rounded-lg border border-amber-900/10 bg-white p-5">
+        <form onSubmit={handleSubmit} noValidate className="card space-y-5 p-5 sm:p-6">
           {(
             [
               { id: "name", label: "Full name", type: "text", autoComplete: "name" },
@@ -76,7 +76,7 @@ export default function CheckoutPage() {
             ] as const
           ).map(({ id, label, type, autoComplete }) => (
             <div key={id}>
-              <label htmlFor={id} className="mb-1 block text-sm font-medium">
+              <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
                 {label}
               </label>
               <input
@@ -92,14 +92,14 @@ export default function CheckoutPage() {
                 className={inputClass}
               />
               {errors[id] && (
-                <p id={`${id}-error`} className="mt-1 text-sm text-red-700">
+                <p id={`${id}-error`} className="mt-1.5 text-sm font-medium text-red-700">
                   {errors[id]}
                 </p>
               )}
             </div>
           ))}
           <div>
-            <label htmlFor="address" className="mb-1 block text-sm font-medium">
+            <label htmlFor="address" className="mb-1.5 block text-sm font-medium">
               Shipping address
             </label>
             <textarea
@@ -115,7 +115,7 @@ export default function CheckoutPage() {
               className={inputClass}
             />
             {errors.address && (
-              <p id="address-error" className="mt-1 text-sm text-red-700">
+              <p id="address-error" className="mt-1.5 text-sm font-medium text-red-700">
                 {errors.address}
               </p>
             )}
@@ -123,16 +123,16 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={placing}
-            className="w-full rounded bg-amber-900 px-4 py-3 font-medium text-white hover:bg-amber-800 disabled:opacity-60"
+            className="btn-primary w-full py-3"
           >
             Place order
           </button>
         </form>
 
-        <aside className="h-fit rounded-lg border border-amber-900/10 bg-white p-5">
-          <h2 className="mb-4 text-lg font-semibold">Order summary</h2>
+        <aside className="card h-fit p-5 sm:p-6">
+          <h2 className="mb-4 text-xl font-semibold">Order summary</h2>
           <OrderSummary />
-          <Link href="/cart" className="mt-4 block text-sm text-amber-900 underline">
+          <Link href="/cart" className="link mt-5 inline-block text-sm">
             Back to cart
           </Link>
         </aside>
