@@ -9,7 +9,7 @@ import { INVALID_COUPON_MESSAGE } from "@/lib/pricing";
 import { formatPrice, getProduct } from "@/lib/products";
 
 export default function CartPage() {
-  const { lines, coupon, hydrated, setQuantity, removeItem, applyCoupon, removeCoupon } = useCart();
+  const { lines, coupon, totals, hydrated, setQuantity, removeItem, applyCoupon, removeCoupon } = useCart();
   const [code, setCode] = useState("");
   const [couponError, setCouponError] = useState<string | null>(null);
 
@@ -133,8 +133,14 @@ export default function CartPage() {
 
           <OrderSummary />
 
+          {totals.discounts.total > 0 && (
+            <p className="rounded-2xl bg-accent/15 px-3.5 py-2.5 text-center text-sm font-semibold tabular-nums">
+              {`You saved ${formatPrice(totals.discounts.total)}`}
+            </p>
+          )}
+
           <Link href="/checkout" className="glass pill pill-accent w-full">
-            Proceed to checkout
+            Go to payment
           </Link>
         </aside>
       </div>

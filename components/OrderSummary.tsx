@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
+import { BUNDLE_MIN_BAGS } from "@/lib/pricing";
 import { formatPrice } from "@/lib/products";
 
 export function OrderSummary() {
@@ -15,12 +16,21 @@ export function OrderSummary() {
         <dt className="text-muted">Subtotal</dt>
         <dd className="text-right tabular-nums">{formatPrice(totals.subtotal)}</dd>
       </div>
-      <div className="flex justify-between gap-4">
-        <dt className="text-muted">{coupon ? `Discount (${coupon})` : "Discount"}</dt>
-        <dd className="text-right tabular-nums">
-          {totals.discount > 0 ? `-${formatPrice(totals.discount)}` : formatPrice(0)}
-        </dd>
-      </div>
+      {totals.discounts.bundle > 0 && (
+        <div className="flex justify-between gap-4">
+          <dt className="text-muted">{`Bundle discount (${BUNDLE_MIN_BAGS}+ bags)`}</dt>
+          <dd className="text-right tabular-nums">{`-${formatPrice(totals.discounts.bundle)}`}</dd>
+        </div>
+      )}
+      {/* The generic $0.00 row is only useful when no other discount row is showing. */}
+      {(coupon || totals.discounts.bundle === 0) && (
+        <div className="flex justify-between gap-4">
+          <dt className="text-muted">{coupon ? `Discount (${coupon})` : "Discount"}</dt>
+          <dd className="text-right tabular-nums">
+            {totals.discounts.coupon > 0 ? `-${formatPrice(totals.discounts.coupon)}` : formatPrice(0)}
+          </dd>
+        </div>
+      )}
       <div className="flex justify-between gap-4">
         <dt className="text-muted">Shipping</dt>
         <dd className="text-right tabular-nums">

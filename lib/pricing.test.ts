@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
-  calculateDiscount,
+  applyDiscounts,
   calculateShipping,
   calculateSubtotal,
   calculateTotals,
+  countBags,
   INVALID_COUPON_MESSAGE,
   isValidCoupon,
   type CartLine,
@@ -58,17 +59,91 @@ describe("Rule 3: SAVE10 coupon", () => {
   });
 
   it("takes 10% off the subtotal", () => {
-    expect(calculateDiscount(4400, "SAVE10")).toBe(440);
-    expect(calculateDiscount(1200, "SAVE10")).toBe(120);
+    // House Blend x2 + Kenya AA x1 = $44
+    const lines: CartLine[] = [
+      { productId: "house-blend", quantity: 2 },
+      { productId: "kenya-aa", quantity: 1 },
+    ];
+    expect(applyDiscounts(lines, "SAVE10")).toEqual({ bundle: 0, coupon: 440, total: 440 });
+    expect(applyDiscounts([{ productId: "house-blend", quantity: 1 }], "SAVE10").coupon).toBe(120);
   });
 
   it("gives no discount without a coupon or with an invalid one", () => {
-    expect(calculateDiscount(4400, null)).toBe(0);
-    expect(calculateDiscount(4400, "BOGUS")).toBe(0);
+    const lines: CartLine[] = [{ productId: "kenya-aa", quantity: 2 }];
+    expect(applyDiscounts(lines, null)).toEqual({ bundle: 0, coupon: 0, total: 0 });
+    expect(applyDiscounts(lines, "BOGUS")).toEqual({ bundle: 0, coupon: 0, total: 0 });
   });
 
   it("uses the exact invalid-code message", () => {
     expect(INVALID_COUPON_MESSAGE).toBe("Code not valid");
+  });
+});
+
+describe("Bundle discount: 4+ bags", () => {
+  it("counts bags across line items, ignoring unknown products and non-positive quantities", () => {
+    const lines: CartLine[] = [
+      { productId: "house-blend", quantity: 2 },
+      { productId: "kenya-aa", quantity: 1 },
+      { productId: "unknown", quantity: 5 },
+      { productId: "espresso-roast", quantity: 0 },
+    ];
+    expect(countBags(lines)).toBe(3);
+  });
+
+  it("does not apply to 3 bags", () => {
+    const lines: CartLine[] = [{ productId: "house-blend", quantity: 3 }];
+    expect(applyDiscounts(lines, null)).toEqual({ bundle: 0, coupon: 0, total: 0 });
+  });
+
+  it("takes 15% off the subtotal at exactly 4 bags", () => {
+    // House Blend x4 = $48 → $7.20 off
+    const lines: CartLine[] = [{ productId: "house-blend", quantity: 4 }];
+    expect(applyDiscounts(lines, null)).toEqual({ bundle: 720, coupon: 0, total: 720 });
+  });
+
+  it("counts bags of different products together", () => {
+    // House Blend x2 + Kenya AA x2 = $64 → $9.60 off
+    const lines: CartLine[] = [
+      { productId: "house-blend", quantity: 2 },
+      { productId: "kenya-aa", quantity: 2 },
+    ];
+    expect(applyDiscounts(lines, null)).toEqual({ bundle: 960, coupon: 0, total: 960 });
+  });
+
+  it("does not count unknown products toward the 4 bags", () => {
+    const lines: CartLine[] = [
+      { productId: "house-blend", quantity: 1 },
+      { productId: "unknown", quantity: 3 },
+    ];
+    expect(applyDiscounts(lines, null).bundle).toBe(0);
+  });
+
+  it("stacks with SAVE10, each taken off the original subtotal", () => {
+    // House Blend x4 = $48 → 15% ($7.20) + 10% ($4.80) = $12 off
+    const lines: CartLine[] = [{ productId: "house-blend", quantity: 4 }];
+    expect(applyDiscounts(lines, "save10")).toEqual({ bundle: 720, coupon: 480, total: 1200 });
+  });
+
+  it("feeds the combined discount into shipping and the total", () => {
+    // House Blend x2 + Kenya AA x2 = $64
+    const lines: CartLine[] = [
+      { productId: "house-blend", quantity: 2 },
+      { productId: "kenya-aa", quantity: 2 },
+    ];
+    // Bundle only: $64 - $9.60 = $54.40 → free shipping
+    expect(calculateTotals(lines, null)).toEqual({
+      subtotal: 6400,
+      discounts: { bundle: 960, coupon: 0, total: 960 },
+      shipping: 0,
+      total: 5440,
+    });
+    // Bundle + SAVE10: $64 - $16 = $48 → $5 shipping
+    expect(calculateTotals(lines, "SAVE10")).toEqual({
+      subtotal: 6400,
+      discounts: { bundle: 960, coupon: 640, total: 1600 },
+      shipping: 500,
+      total: 5300,
+    });
   });
 });
 
@@ -91,13 +166,13 @@ describe("Rule 4: shipping", () => {
     ];
     expect(calculateTotals(lines, null)).toEqual({
       subtotal: 5200,
-      discount: 0,
+      discounts: { bundle: 0, coupon: 0, total: 0 },
       shipping: 0,
       total: 5200,
     });
     expect(calculateTotals(lines, "SAVE10")).toEqual({
       subtotal: 5200,
-      discount: 520,
+      discounts: { bundle: 0, coupon: 520, total: 520 },
       shipping: 500,
       total: 5180,
     });
@@ -111,7 +186,7 @@ describe("Rule 4: shipping", () => {
     ];
     expect(calculateTotals(lines, "SAVE10")).toEqual({
       subtotal: 5600,
-      discount: 560,
+      discounts: { bundle: 0, coupon: 560, total: 560 },
       shipping: 0,
       total: 5040,
     });
@@ -120,7 +195,7 @@ describe("Rule 4: shipping", () => {
   it("charges nothing for an empty cart", () => {
     expect(calculateTotals([], "SAVE10")).toEqual({
       subtotal: 0,
-      discount: 0,
+      discounts: { bundle: 0, coupon: 0, total: 0 },
       shipping: 0,
       total: 0,
     });
@@ -132,13 +207,13 @@ describe("Total", () => {
     const lines: CartLine[] = [{ productId: "ethiopia-yirgacheffe", quantity: 1 }];
     expect(calculateTotals(lines, null)).toEqual({
       subtotal: 1800,
-      discount: 0,
+      discounts: { bundle: 0, coupon: 0, total: 0 },
       shipping: 500,
       total: 2300,
     });
     expect(calculateTotals(lines, "SAVE10")).toEqual({
       subtotal: 1800,
-      discount: 180,
+      discounts: { bundle: 0, coupon: 180, total: 180 },
       shipping: 500,
       total: 2120,
     });
