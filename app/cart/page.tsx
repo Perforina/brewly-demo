@@ -133,7 +133,7 @@ export default function CartPage() {
 
           <OrderSummary />
 
-          <Link href="/checkout" className="glass pill pill-accent w-full">
+          <Link href="/checkout" className="glass pill pill-accent w-full bg-[#5fb3a1]">
             Proceed to checkout
           </Link>
         </aside>
