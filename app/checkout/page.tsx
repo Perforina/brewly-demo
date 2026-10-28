@@ -7,8 +7,16 @@ import { OrderSummary } from "@/components/OrderSummary";
 import { useCart } from "@/context/CartContext";
 import { generateOrderNumber, saveLastOrder } from "@/lib/order";
 import { isValidEmail } from "@/lib/validation";
+import { TEST_CARDS, chargeMock, validateCard } from "@/lib/payment";
 
-type Fields = { name: string; email: string; address: string };
+type Fields = {
+  name: string;
+  email: string;
+  address: string;
+  cardNumber: string;
+  expiry: string;
+  cvc: string;
+};
 type Errors = Partial<Record<keyof Fields, string>>;
 
 function validate(fields: Fields): Errors {
@@ -17,7 +25,7 @@ function validate(fields: Fields): Errors {
   if (!fields.email.trim()) errors.email = "Email is required";
   else if (!isValidEmail(fields.email)) errors.email = "Enter a valid email address";
   if (!fields.address.trim()) errors.address = "Address is required";
-  return errors;
+  return { ...errors, ...validateCard(fields) };
 }
 
 const inputClass = "glass-input";
@@ -25,9 +33,17 @@ const inputClass = "glass-input";
 export default function CheckoutPage() {
   const router = useRouter();
   const { lines, totals, hydrated, clearCart } = useCart();
-  const [fields, setFields] = useState<Fields>({ name: "", email: "", address: "" });
+  const [fields, setFields] = useState<Fields>({
+    name: "",
+    email: "",
+    address: "",
+    cardNumber: "",
+    expiry: "",
+    cvc: "",
+  });
   const [errors, setErrors] = useState<Errors>({});
   const [placing, setPlacing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   if (!hydrated) {
     return (
@@ -51,6 +67,7 @@ export default function CheckoutPage() {
 
   function update(field: keyof Fields, value: string) {
     setFields((f) => ({ ...f, [field]: value }));
+    if (field === "cardNumber" || field === "expiry" || field === "cvc") setPaymentError(null);
   }
 
   function handleSubmit(e: FormEvent) {
@@ -59,16 +76,32 @@ export default function CheckoutPage() {
     setErrors(found);
     if (Object.keys(found).length > 0) return;
 
+    setPaymentError(null);
     setPlacing(true);
-    saveLastOrder({
-      orderNumber: generateOrderNumber(),
-      total: totals.total,
-      name: fields.name.trim(),
-      email: fields.email.trim(),
-    });
-    clearCart();
-    router.push("/confirmation");
+    // Short pause so the mock charge reads like a real payment step.
+    window.setTimeout(() => {
+      const result = chargeMock(fields.cardNumber);
+      if (!result.ok) {
+        setPlacing(false);
+        setPaymentError("Payment declined. Your card was not charged and your cart is saved. Try a different card.");
+        return;
+      }
+      saveLastOrder({
+        orderNumber: generateOrderNumber(),
+        total: totals.total,
+        name: fields.name.trim(),
+        email: fields.email.trim(),
+      });
+      clearCart();
+      router.push("/confirmation");
+    }, 800);
   }
+
+  const cardInputs = [
+    { id: "cardNumber", label: "Card number", autoComplete: "cc-number", placeholder: "1234 5678 9012 3456" },
+    { id: "expiry", label: "Expiry (MM/YY)", autoComplete: "cc-exp", placeholder: "MM/YY" },
+    { id: "cvc", label: "CVC", autoComplete: "cc-csc", placeholder: "123" },
+  ] as const;
 
   return (
     <div className="rise">
@@ -126,12 +159,49 @@ export default function CheckoutPage() {
               </p>
             )}
           </div>
+          <fieldset className="space-y-4 border-t border-white/10 pt-5">
+            <legend className="mb-2 text-lg font-semibold">Payment</legend>
+            <p className="rounded-2xl bg-white/[0.05] px-4 py-3 text-sm text-muted">
+              {`Test mode, no real payments. Pay with ${TEST_CARDS.success}. Simulate a decline with ${TEST_CARDS.decline}. Any expiry and any 3-digit CVC.`}
+            </p>
+            {cardInputs.map(({ id, label, autoComplete, placeholder }) => (
+              <div key={id}>
+                <label htmlFor={id} className="mb-2 block text-sm font-medium text-muted">
+                  {label}
+                </label>
+                <input
+                  id={id}
+                  name={id}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete={autoComplete}
+                  placeholder={placeholder}
+                  required
+                  value={fields[id]}
+                  onChange={(e) => update(id, e.target.value)}
+                  aria-invalid={!!errors[id]}
+                  aria-describedby={errors[id] ? `${id}-error` : undefined}
+                  className={inputClass}
+                />
+                {errors[id] && (
+                  <p id={`${id}-error`} className="mt-1.5 text-sm font-medium text-danger">
+                    {errors[id]}
+                  </p>
+                )}
+              </div>
+            ))}
+          </fieldset>
+          {paymentError && (
+            <p role="alert" className="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm font-medium text-danger">
+              {paymentError}
+            </p>
+          )}
           <button
             type="submit"
             disabled={placing}
             className="glass pill pill-accent w-full"
           >
-            Place order
+            {placing ? "Processing payment…" : "Place order"}
           </button>
         </form>
 
